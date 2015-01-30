@@ -1,0 +1,4 @@
+ChangeNotification.cpp libraries/IO/chipkit/ChangeNotification/
+ChangeNotification.h libraries/IO/chipkit/ChangeNotification/
+LICENSE usr/share/doc/libchangenotification-chipkit/
+README.md usr/share/doc/libchangenotification-chipkit/
