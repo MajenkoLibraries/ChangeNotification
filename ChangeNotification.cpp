@@ -1,4 +1,3 @@
-#include <plib.h>
 #include "ChangeNotification.h"
 
 struct cn_state cn_states[NUM_CN];
@@ -28,6 +27,38 @@ const struct cn_setting cn_settings[NUM_CN] = {
 	{ 15, &TRISD, &PORTD }, // CN21 - RD15
 };
 
+void __USER_ISR cn_isr() {
+    for(unsigned char i=0; i<NUM_CN; i++)
+    {
+        int s = *(cn_settings[i].PORT) & (1<<cn_settings[i].pin);
+        unsigned char onoff = s == 0 ? LOW : HIGH;
+        if(cn_states[i].current != onoff)
+        {
+            cn_states[i].previous = cn_states[i].current;
+            cn_states[i].current = onoff;
+
+            if(((cn_states[i].falling!=NULL) || (cn_states[i].change!=NULL))
+                 && (cn_states[i].previous == HIGH) && (cn_states[i].current == LOW))
+            {
+                if(cn_states[i].falling != NULL)
+                    cn_states[i].falling();
+                if(cn_states[i].change != NULL)
+                    cn_states[i].change();
+            }
+
+            if(((cn_states[i].rising!=NULL) || (cn_states[i].change!=NULL))
+                 && (cn_states[i].previous == LOW) && (cn_states[i].current == HIGH))
+            {
+                if(cn_states[i].rising != NULL)
+                    cn_states[i].rising();
+                if(cn_states[i].change != NULL)
+                    cn_states[i].change();
+            }
+        }
+    }
+    clearIntFlag(_CHANGE_NOTICE_IRQ);
+}
+
 void attachInterrupt(struct cn cn, void (*function)(), unsigned char type)
 {
 	int s;
@@ -50,10 +81,12 @@ void attachInterrupt(struct cn cn, void (*function)(), unsigned char type)
 	CNEN |= 1<<cn.num;
 	s = *(cn_settings[cn.num].PORT) & (1<<cn_settings[cn.num].pin);
 	cn_states[cn.num].current = cn_states[cn.num].previous = s == 0 ? LOW : HIGH;
-	IFS1bits.CNIF=0;
-	IEC1bits.CNIE=1;
-	IPC6bits.CNIP	=	_CN_IPL_IPC;
-	IPC6bits.CNIS	=	_CN_SPL_IPC;
+
+    setIntVector(_CHANGE_NOTICE_VECTOR, cn_isr);
+    setIntPriority(_CHANGE_NOTICE_VECTOR, 3, 0);
+    clearIntFlag(_CHANGE_NOTICE_IRQ);
+    setIntEnable(_CHANGE_NOTICE_IRQ);
+
 	CNCONbits.ON	=	1;
 	CNCONbits.SIDL	=	0;
 }
@@ -86,37 +119,3 @@ void detachInterrupt(struct cn cn, char type)
 			CNEN &= ~(1<<cn.num);
 }
 
-extern "C" {
-	void __ISR(_CHANGE_NOTICE_VECTOR, _CN_IPL_ISR) cn_isr()
-	{
-		for(unsigned char i=0; i<NUM_CN; i++)
-		{
-			int s = *(cn_settings[i].PORT) & (1<<cn_settings[i].pin);
-			unsigned char onoff = s == 0 ? LOW : HIGH;
-			if(cn_states[i].current != onoff)
-			{
-				cn_states[i].previous = cn_states[i].current;
-				cn_states[i].current = onoff;
-
-				if(((cn_states[i].falling!=NULL) || (cn_states[i].change!=NULL))
-					 && (cn_states[i].previous == HIGH) && (cn_states[i].current == LOW))
-				{
-					if(cn_states[i].falling != NULL)
-						cn_states[i].falling();
-					if(cn_states[i].change != NULL)
-						cn_states[i].change();
-				}
-
-				if(((cn_states[i].rising!=NULL) || (cn_states[i].change!=NULL))
-					 && (cn_states[i].previous == LOW) && (cn_states[i].current == HIGH))
-				{
-					if(cn_states[i].rising != NULL)
-						cn_states[i].rising();
-					if(cn_states[i].change != NULL)
-						cn_states[i].change();
-				}
-			}
-		}
-		IFS1bits.CNIF=0;
-	}
-}

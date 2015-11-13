@@ -3,6 +3,10 @@
 
 #include <WProgram.h>
 
+#if defined(__PIC32MX1XX__) || defined(__PIC32MX2XX__) || defined(__PIC32MZ__)
+#error The ChangeNotification library is not supported on this chip
+#endif
+
 struct cn {
 	unsigned char num;
 };
@@ -44,8 +48,8 @@ extern struct cn_state cn_states[NUM_CN];
 
 struct cn_setting {
 	unsigned char pin;
-	volatile uint32_t *TRIS;
-	volatile uint32_t *PORT;
+	volatile unsigned int *TRIS;
+	volatile unsigned int *PORT;
 };
 
 void attachInterrupt(struct cn, void (*)(), unsigned char);
