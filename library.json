@@ -1,0 +1,13 @@
+{
+  "name": "ChangeNotification",
+  "keywords": "interrupt, pcint, pinchange, changenotification",
+  "description": "ChangeNotification interrupts for chipKIT",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/MajenkoLibraries/ChangeNotification"
+  },
+  "version": "1.0.4",
+  "frameworks": "arduino",
+  "platforms": "microchippic32"
+}
