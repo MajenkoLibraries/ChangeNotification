@@ -1,17 +1,1 @@
-{
-    "name": "ChangeNotification",
-    "provides": "ChangeNotification.h",
-    "license": "LICENSE.md",
-    "readme": "README.md",
-    "description": "Use the PIC32 Change Notification pins as interrupts",
-    "category": "IO",
-    "subcategory": "Digital",
-    "maintainer": "Matt Jenkins <matt@majenko.co.uk>",
-    "version": "1.0.7",
-    "family": "pic32",
-    "core": "chipkit",
-    "install": {
-        "ChangeNotification.cpp": "/",
-        "ChangeNotification.h": "/"
-    }
-}
+{"name":"ChangeNotification","provides":"ChangeNotification.h","license":"LICENSE.md","readme":"README.md","description":"Use the PIC32 Change Notification pins as interrupts","category":"IO","subcategory":"Digital","maintainer":"Matt Jenkins <matt@majenko.co.uk>","version":"1.0.8","family":"pic32","core":"chipkit","install":{"library.properties":"\/","src":"\/"}}
